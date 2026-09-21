@@ -19,19 +19,6 @@
   } else { reveals.forEach(function (el) { el.classList.add('in'); }); }
   setTimeout(function () { reveals.forEach(function (el) { el.classList.add('in'); }); }, 4000);
 
-  /* ---------- gauge: needle swings up when it scrolls into view ---------- */
-  var gw = $('#gwrap'), needle = $('#needle');
-  function startWobble() { if (needle) needle.classList.add('wobble'); }
-  if (gw && 'IntersectionObserver' in window) {
-    var gio = new IntersectionObserver(function (en) {
-      if (en[0].isIntersecting) {
-        gw.classList.add('is-in'); gio.disconnect();
-        setTimeout(startWobble, 2100);
-      }
-    }, { threshold: 0.35 });
-    gio.observe(gw);
-  } else if (gw) { gw.classList.add('is-in'); startWobble(); }
-
   /* ---------- map links ---------- */
   if (C.mapUrl) $$('[data-map]').forEach(function (a) { a.href = C.mapUrl; });
   if (C.mapUrl) $$('[data-mapnav]').forEach(function (a) { a.href = C.mapUrl; a.target = '_blank'; a.rel = 'noopener'; });
@@ -42,26 +29,19 @@
     if (pk && pn) { pn.textContent = C.parkingNote; pk.hidden = false; }
   }
 
-  /* ---------- add to calendar (.ics) ---------- */
-  function esc(t) { return String(t == null ? '' : t).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'); }
-  function downloadIcs() {
+  /* ---------- add to calendar (opens Google Calendar with the event pre-filled) ---------- */
+  (function () {
     var ev = C.event || {};
-    var stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
-    var lines = [
-      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Tanawit and Kawisara//Love AT FIRST DRINK//EN', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
-      'BEGIN:VEVENT', 'UID:love-at-first-drink-20261226@tanawit-kawisara', 'DTSTAMP:' + stamp,
-      'DTSTART:' + ev.startUtc, 'DTEND:' + ev.endUtc,
-      'SUMMARY:' + esc(ev.title), 'LOCATION:' + esc(ev.location), 'DESCRIPTION:' + esc(ev.description),
-      'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc('พรุ่งนี้: ' + ev.title + ' · เรียกรถกลับบ้านไว้ด้วยนะ'), 'END:VALARM',
-      'END:VEVENT', 'END:VCALENDAR'
-    ];
-    var blob = new Blob([lines.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = 'love-at-first-drink.ics';
-    document.body.appendChild(a); a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
-  }
-  $$('[data-ics]').forEach(function (b) { b.addEventListener('click', downloadIcs); });
+    if (!ev.startUtc || !ev.endUtc) return;
+    var details = (ev.description || '') + (C.mapUrl ? '\nแผนที่ / Map: ' + C.mapUrl : '');
+    var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+      '&text=' + encodeURIComponent(ev.title || '') +
+      '&dates=' + encodeURIComponent(ev.startUtc + '/' + ev.endUtc) +
+      '&details=' + encodeURIComponent(details) +
+      '&location=' + encodeURIComponent(ev.location || '') +
+      '&ctz=' + encodeURIComponent('Asia/Bangkok');
+    $$('[data-gcal]').forEach(function (a) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; });
+  })();
 
   /* ---------- sticky mobile RSVP bar ----------
      Shows once the hero CTA has scrolled away; hides again while the RSVP form
@@ -104,8 +84,15 @@
   });
 
   // Drunk-o-Meter label follows the slider
-  function readyLabel(v) { return v < 25 ? 'SOBER' : v < 50 ? 'TIPSY' : v < 80 ? 'WASTED' : 'LEGEND'; }
-  function syncReady() { rl.textContent = readyLabel(+ready.value); }
+  function readyLabel(v) { return v < 25 ? 'คอไม่แข็ง แถมแฮงค์นาน' : v < 50 ? 'ไม่เมา แค่ไม่เหมือนเดิม' : v < 80 ? 'ทั้งคืนยังได้' : 'อ้วกไม่นับ หลับเป็นแพ้'; }
+  var pin = $('#mtr-pin'), mlist = $$('#mtr-list li');
+  function syncReady() {
+    var v = +ready.value;
+    rl.textContent = readyLabel(v);
+    if (pin) pin.style.left = v + '%';
+    var lvl = v < 25 ? 0 : v < 50 ? 1 : v < 80 ? 2 : 3;
+    mlist.forEach(function (li, i) { li.classList.toggle('is-on', i === lvl); });
+  }
   ready.addEventListener('input', syncReady); syncReady();
 
   // attending = no  ->  hide everything that only matters to attendees
