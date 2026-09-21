@@ -5,10 +5,10 @@
 ## โครงไฟล์
 
 ```
-index.html              เนื้อหาทั้งหมด (ข้อความไทย/อังกฤษอยู่ในไฟล์นี้ เป็นคู่ .th / .en)
+index.html              เนื้อหาทั้งหมด (หน้าเดียว ไทย+อังกฤษผสมกัน ไม่มีปุ่มเลือกภาษา)
 assets/css/style.css    สไตล์ + สีทั้งหมด (ตัวแปรสีอยู่บนสุดของไฟล์ใน :root)
-assets/js/config.js     ค่าที่ต้องตั้ง: ลิงก์รับข้อมูล RSVP, ลิงก์แผนที่, เวลาปฏิทิน
-assets/js/main.js       สลับภาษา, มาตรวัด, ฟอร์ม RSVP, ปุ่มเพิ่มลงปฏิทิน
+assets/js/config.js     ค่าที่ต้องตั้ง: ลิงก์รับข้อมูล RSVP, ลิงก์แผนที่, ข้อมูลที่จอดรถ, เวลาปฏิทิน
+assets/js/main.js       มาตรวัด, ฟอร์ม RSVP (ตรวจช่องที่ต้องกรอก), ปุ่ม RSVP ลอยบนมือถือ, ปุ่มเพิ่มลงปฏิทิน
 assets/img/             รูปทั้งหมด (มีทั้งไฟล์เล็ก -sm สำหรับมือถือ และไฟล์ใหญ่)
 ```
 
@@ -21,7 +21,7 @@ assets/img/             รูปทั้งหมด (มีทั้งไฟ
 
 ```js
 const SHEET_NAME = 'RSVP';
-const HEADERS = ['เวลา', 'มา/ไม่มา', 'ชื่อ', 'ติดต่อ', 'เครื่องดื่ม', 'จำนวนที่นั่ง', 'แพ้อาหาร', 'ขากลับ', 'ระดับพร้อมเมา', 'ข้อความ', 'ภาษา'];
+const HEADERS = ['เวลา', 'มา/ไม่มา', 'ชื่อ', 'ติดต่อ', 'เครื่องดื่ม', 'จำนวนที่นั่ง', 'แพ้อาหาร', 'ขากลับ', 'ระดับพร้อมเมา', 'ข้อความ'];
 
 function doPost(e) {
   const d = JSON.parse(e.postData.contents);
@@ -30,7 +30,7 @@ function doPost(e) {
   if (sh.getLastRow() === 0) sh.appendRow(HEADERS);
   sh.appendRow([
     new Date(d.submittedAt), d.attend === 'yes' ? 'มา' : 'ไม่มา', d.name, d.contact,
-    d.drink, d.guests, d.dietary, d.ride, d.readiness, d.message, d.lang
+    d.drink, d.guests, d.dietary, d.ride, d.readiness, d.message
   ]);
   return ContentService.createTextOutput('ok');
 }
@@ -64,14 +64,16 @@ function doPost(e) {
 3. Build command: เว้นว่าง · Build output directory: `/`
 
 ### หลังมีโดเมนแล้ว
-ใน `index.html` แก้ `og:image` ให้เป็นลิงก์เต็ม เช่น `https://โดเมนของคุณ/assets/img/og.jpg` เพื่อให้ตอนแชร์ใน LINE/Facebook ขึ้นรูปตัวอย่าง
+ใน `index.html` แก้ `og:image` และ `og:url` ให้เป็นลิงก์เต็ม (ตอนนี้ชี้ไปที่ GitHub Pages) เช่น `https://โดเมนของคุณ/assets/img/og.jpg` เพื่อให้ตอนแชร์ใน LINE/Facebook ขึ้นรูปตัวอย่าง
 
 ## 4) แก้เนื้อหา
 
-- **ข้อความ**: ใน `index.html` ทุกข้อความมีสองภาษา `<span class="th">…</span><span class="en">…</span>`
+- **ข้อความ**: แก้ตรงๆ ใน `index.html` ได้เลย หลักคือ อังกฤษ = ชื่อหัวข้อ/ชื่อเมนู/บุคลิก, ไทย = ข้อมูลสำคัญที่แขกต้องอ่าน (ไม่เขียนซ้ำสองภาษา)
 - **ตารางงาน**: ส่วน `<ol class="rail">` มี 4 รอบ (`<li class="row">`) แก้เวลา ชื่อ และคำอธิบายได้
 - **สี**: `:root` บนสุดของ `style.css` (`--bg` เบอร์กันดี, `--org` ส้ม, `--olv` มะกอก, `--gold` ครีม)
 - **รูป**: ใส่ไฟล์ webp ใหม่ใน `assets/img/` แล้วแก้ชื่อไฟล์ใน `index.html` (แนะนำทำสองขนาด: กว้าง 640 และ 1200)
+- **ที่จอดรถ**: ใส่ข้อความใน `parkingNote` ของ `config.js` แล้วการ์ด PARKING ในส่วน GETTING HOME จะโผล่ขึ้นเอง (เว้นว่าง = ไม่แสดง)
+- **ช่องที่ต้องกรอกในฟอร์ม**: ชื่อ (เสมอ) · ถ้าตอบว่ามา ต้องมี LINE/เบอร์โทร และถ้าเลือก "มี" แพ้อาหาร ต้องระบุ ส่วน THE FUN STUFF (เครื่องดื่ม ขากลับ ทายระดับความเมา) และข้อความถึงคู่บ่าวสาวข้ามได้
 - **ช่องฟอร์ม**: เพิ่ม/ลบช่องใน `<form id="rsvp-form">` ถ้าเพิ่มช่องใหม่ ต้องเพิ่มชื่อฟิลด์ในตัวแปร `data` ของ `main.js` และเพิ่มคอลัมน์ในสคริปต์ Apps Script ด้วย
 - **ปิดการกัน Google ไม่ให้ค้นเจอ**: ตอนนี้ตั้ง `noindex` ไว้ (ให้เฉพาะคนที่มีลิงก์เข้าได้) ถ้าอยากให้ค้นเจอ ให้ลบบรรทัด `<meta name="robots">` ใน `index.html`
 
