@@ -8,7 +8,7 @@
 index.html              เนื้อหาทั้งหมด (หน้าเดียว ไทย+อังกฤษผสมกัน ไม่มีปุ่มเลือกภาษา)
 assets/css/style.css    สไตล์ + สีทั้งหมด (ตัวแปรสีอยู่บนสุดของไฟล์ใน :root)
 assets/js/config.js     ค่าที่ต้องตั้ง: ลิงก์รับข้อมูล RSVP, ลิงก์แผนที่, ข้อมูลที่จอดรถ, เวลาปฏิทิน
-assets/js/main.js       แถบ Drunk-o-Meter ข้างฟอร์ม (ขยับตามสไลเดอร์), ฟอร์ม RSVP (ตรวจช่องที่ต้องกรอก), ปุ่ม RSVP ลอยบนมือถือ, ปุ่มเพิ่มลงปฏิทิน
+assets/js/main.js       มาตรเมาข้างฟอร์ม (ขยับตามสไลเดอร์ 4 จังหวะ), ฟอร์ม RSVP (ตรวจช่องที่ต้องกรอก, ส่งข้อมูล), ใบเสร็จความพร้อม + ปุ่มเซฟเป็นภาพ PNG, ปุ่ม RSVP ลอยบนมือถือ, ปุ่มเพิ่มลงปฏิทิน
 assets/img/             รูปทั้งหมด (มีทั้งไฟล์เล็ก -sm สำหรับมือถือ และไฟล์ใหญ่)
 ```
 
@@ -21,18 +21,44 @@ assets/img/             รูปทั้งหมด (มีทั้งไฟ
 
 ```js
 const SHEET_NAME = 'RSVP';
-const HEADERS = ['เวลา', 'มา/ไม่มา', 'ชื่อ', 'ติดต่อ', 'เครื่องดื่ม', 'จำนวนที่นั่ง', 'แพ้อาหาร', 'ขากลับ', 'ระดับพร้อมเมา', 'ข้อความ'];
+// เรียงคอลัมน์เดิม 13 ช่องไว้เหมือนเดิม แล้วต่อคอลัมน์ใหม่ท้ายตารางเสมอ (เพิ่มฟีเจอร์ทีหลังก็ทำแบบนี้ได้
+// เรื่อยๆ โดยไม่ทำให้แถวเก่าเลื่อนคอลัมน์ผิด)
+const HEADERS = ['เวลา', 'มา/ไม่มา', 'ชื่อ', 'ติดต่อ', 'เครื่องดื่ม', 'จำนวนที่นั่ง', 'แพ้อาหาร', 'การเดินทาง',
+  'ระดับพร้อมเมา', 'ข้อความ', 'เพลงลุกขึ้นเต้น', 'ระดับ (1-4)', 'รหัสส่ง', 'ทะเบียนรถ'];
 
 function doPost(e) {
-  const d = JSON.parse(e.postData.contents);
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
-  if (sh.getLastRow() === 0) sh.appendRow(HEADERS);
-  sh.appendRow([
-    new Date(d.submittedAt), d.attend === 'yes' ? 'มา' : 'ไม่มา', d.name, d.contact,
-    d.drink, d.guests, d.dietary, d.ride, d.readiness, d.message
-  ]);
-  return ContentService.createTextOutput('ok');
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const d = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+    // สร้าง/อัปเดตหัวตารางให้ครบทุกคอลัมน์ (ชีตเก่าที่มี 10 คอลัมน์จะได้คอลัมน์ใหม่ต่อท้ายเอง)
+    sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    // กันแถวซ้ำ: ถ้าแขกกดส่งซ้ำหลังเน็ตหลุด รหัสส่งเดิมจะไม่ถูกบันทึกอีก
+    // (หาคอลัมน์ด้วยชื่อ ไม่ใช่ตำแหน่งสุดท้าย เพราะคอลัมน์ใหม่ๆ จะถูกต่อท้าย 'รหัสส่ง' ไปเรื่อยๆ)
+    const idCol = HEADERS.indexOf('รหัสส่ง') + 1;
+    if (d.submissionId && sh.getLastRow() > 1 &&
+        sh.getRange(2, idCol, sh.getLastRow() - 1, 1).createTextFinder(String(d.submissionId)).matchEntireCell(true).findNext()) {
+      return json_({ ok: true, duplicate: true });
+    }
+    sh.appendRow([
+      new Date(d.submittedAt), d.attend === 'yes' ? 'มา' : 'ไม่มา', d.name, d.contact,
+      d.drink, d.guests, d.dietary, d.ride,
+      d.readinessLevel ? d.readinessLevel + ' · ' + d.readiness : '',   // ไม่ได้เลือกมาตร = เว้นว่าง
+      d.message, d.song, d.readinessLevel || '', d.submissionId || '',
+      d.plate || ''   // มีค่าเฉพาะตอนเลือกตัวเลือก "รถส่วนตัว..." แล้วกรอกทะเบียน
+    ]);
+    return json_({ ok: true });
+  } catch (err) {
+    return json_({ ok: false, error: String(err) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function json_(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
 ```
 
@@ -44,6 +70,8 @@ function doPost(e) {
 6. ทดสอบ: เปิดเว็บ กรอกฟอร์ม กดส่ง แล้วดูว่ามีแถวใหม่ใน Sheet
 
 ถ้าแก้โค้ด Apps Script ภายหลัง ต้องกด **Deploy → Manage deployments → แก้ไข → New version** ถึงจะมีผล
+
+หน้าเว็บจะแสดง "ใบเสร็จความพร้อม" **ก็ต่อเมื่อสคริปต์ตอบกลับว่าบันทึกแล้วจริง** (`{"ok":true}` หรือข้อความ `ok` จากสคริปต์รุ่นเก่า) ถ้าเชื่อมต่อไม่ได้หรือสคริปต์ตอบ error ฟอร์มจะขึ้นข้อความให้ส่งใหม่ พร้อมเก็บคำตอบเดิมไว้ ต้องตั้ง **Who has access: Anyone** ไม่อย่างนั้นเบราว์เซอร์จะอ่านคำตอบกลับไม่ได้
 
 หมายเหตุ: คนที่รู้ลิงก์ Web app สามารถส่งข้อมูลเข้า Sheet ได้ ฟอร์มมีช่องดักบอท (honeypot) อยู่แล้ว แต่ถ้าจะกันเพิ่มให้เพิ่มรหัสลับในสคริปต์ได้
 
@@ -73,7 +101,7 @@ function doPost(e) {
 - **สี**: `:root` บนสุดของ `style.css` (`--bg` เบอร์กันดี, `--org` ส้ม, `--olv` มะกอก, `--gold` ครีม)
 - **รูป**: ใส่ไฟล์ webp ใหม่ใน `assets/img/` แล้วแก้ชื่อไฟล์ใน `index.html` (แนะนำทำสองขนาด: กว้าง 640 และ 1200)
 - **ที่จอดรถ**: ใส่ข้อความใน `parkingNote` ของ `config.js` แล้วการ์ด PARKING ในส่วน GETTING HOME จะโผล่ขึ้นเอง (เว้นว่าง = ไม่แสดง)
-- **ช่องที่ต้องกรอกในฟอร์ม**: ชื่อ (เสมอ) · ถ้าตอบว่ามา ต้องมี LINE/เบอร์โทร และถ้าเลือก "มี" แพ้อาหาร ต้องระบุ ส่วน THE FUN STUFF (เครื่องดื่ม ขากลับ ทายระดับความเมา) และข้อความถึงคู่บ่าวสาวข้ามได้
+- **ช่องที่ต้องกรอกในฟอร์ม**: ชื่อ (เสมอ) · ถ้าตอบว่ามา ต้องมี LINE/เบอร์โทร และถ้าเลือก "มี" แพ้อาหาร ต้องระบุ ส่วน THE FUN STUFF (เครื่องดื่ม ขากลับ มาตรเมา ขอเพลง) และช่องฝากข้อความข้ามได้ (มาตรเมาจะไม่ถูกบันทึกถ้าแขกไม่ได้แตะสไลเดอร์)
 - **ช่องฟอร์ม**: เพิ่ม/ลบช่องใน `<form id="rsvp-form">` ถ้าเพิ่มช่องใหม่ ต้องเพิ่มชื่อฟิลด์ในตัวแปร `data` ของ `main.js` และเพิ่มคอลัมน์ในสคริปต์ Apps Script ด้วย
 - **ปิดการกัน Google ไม่ให้ค้นเจอ**: ตอนนี้ตั้ง `noindex` ไว้ (ให้เฉพาะคนที่มีลิงก์เข้าได้) ถ้าอยากให้ค้นเจอ ให้ลบบรรทัด `<meta name="robots">` ใน `index.html`
 
@@ -81,4 +109,4 @@ function doPost(e) {
 
 - ฟอนต์โหลดจาก Google Fonts ต้องมีอินเทอร์เน็ตตอนเปิดเว็บ
 - ปุ่ม "เพิ่มลงปฏิทิน" ตั้งเวลาจบเป็น 23:00 น. เป็นค่าสมมติ แก้ได้ใน `config.js`
-- ข้อความ "เมาได้ · แต่ห้ามขับ" มีทั้งในส่วนสติกเกอร์ ช่อง "ขากลับจะกลับยังไง?" ในฟอร์ม และท้ายหน้า
+- ข้อความ "เมาได้ · แต่ห้ามขับ" มีทั้งในส่วนสติกเกอร์ ส่วน GETTING HOME และท้ายหน้า
