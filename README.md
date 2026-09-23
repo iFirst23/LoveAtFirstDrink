@@ -21,10 +21,10 @@ assets/img/             รูปทั้งหมด (มีทั้งไฟ
 
 ```js
 const SHEET_NAME = 'RSVP';
-// เรียงคอลัมน์เดิม 13 ช่องไว้เหมือนเดิม แล้วต่อคอลัมน์ใหม่ท้ายตารางเสมอ (เพิ่มฟีเจอร์ทีหลังก็ทำแบบนี้ได้
+// เรียงคอลัมน์เดิมไว้เหมือนเดิม แล้วต่อคอลัมน์ใหม่ท้ายตารางเสมอ (เพิ่มฟีเจอร์ทีหลังก็ทำแบบนี้ได้
 // เรื่อยๆ โดยไม่ทำให้แถวเก่าเลื่อนคอลัมน์ผิด)
 const HEADERS = ['เวลา', 'มา/ไม่มา', 'ชื่อ', 'ติดต่อ', 'เครื่องดื่ม', 'จำนวนที่นั่ง', 'แพ้อาหาร', 'การเดินทาง',
-  'ระดับพร้อมเมา', 'ข้อความ', 'เพลงลุกขึ้นเต้น', 'ระดับ (1-4)', 'รหัสส่ง', 'ทะเบียนรถ'];
+  'ระดับพร้อมเมา', 'ข้อความ', 'เพลงลุกขึ้นเต้น', 'ระดับ (1-4)', 'รหัสส่ง', 'ทะเบียนรถ', 'ลำดับ'];
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
@@ -33,23 +33,31 @@ function doPost(e) {
     const d = JSON.parse(e.postData.contents);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
-    // สร้าง/อัปเดตหัวตารางให้ครบทุกคอลัมน์ (ชีตเก่าที่มี 10 คอลัมน์จะได้คอลัมน์ใหม่ต่อท้ายเอง)
+    // สร้าง/อัปเดตหัวตารางให้ครบทุกคอลัมน์ (ชีตเก่าที่มีคอลัมน์น้อยกว่าจะได้คอลัมน์ใหม่ต่อท้ายเอง)
     sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-    // กันแถวซ้ำ: ถ้าแขกกดส่งซ้ำหลังเน็ตหลุด รหัสส่งเดิมจะไม่ถูกบันทึกอีก
-    // (หาคอลัมน์ด้วยชื่อ ไม่ใช่ตำแหน่งสุดท้าย เพราะคอลัมน์ใหม่ๆ จะถูกต่อท้าย 'รหัสส่ง' ไปเรื่อยๆ)
+    // กันแถวซ้ำ: ถ้าแขกกดส่งซ้ำหลังเน็ตหลุด รหัสส่งเดิมจะไม่ถูกบันทึกอีก (คืนเลขลำดับเดิมกลับไปด้วย
+    // ไม่งั้นบัตรจะมี 2 เลขสำหรับคนเดียว)
+    // (หาคอลัมน์ด้วยชื่อ ไม่ใช่ตำแหน่งสุดท้าย เพราะคอลัมน์ใหม่ๆ จะถูกต่อท้ายไปเรื่อยๆ)
     const idCol = HEADERS.indexOf('รหัสส่ง') + 1;
-    if (d.submissionId && sh.getLastRow() > 1 &&
-        sh.getRange(2, idCol, sh.getLastRow() - 1, 1).createTextFinder(String(d.submissionId)).matchEntireCell(true).findNext()) {
-      return json_({ ok: true, duplicate: true });
+    const runCol = HEADERS.indexOf('ลำดับ') + 1;
+    if (d.submissionId && sh.getLastRow() > 1) {
+      const hit = sh.getRange(2, idCol, sh.getLastRow() - 1, 1).createTextFinder(String(d.submissionId)).matchEntireCell(true).findNext();
+      if (hit) {
+        return json_({ ok: true, duplicate: true, runNumber: sh.getRange(hit.getRow(), runCol).getValue() });
+      }
     }
+    // เลขลำดับ = จำนวนแถวข้อมูลที่มีอยู่ก่อนแถวนี้ + 1 (แถว 1 คือหัวตาราง) ไม่ใช่ตัวนับแยกที่เก็บไว้ที่อื่น
+    // ดังนั้นถ้าลบแถวในชีตทิ้ง เลขของคนที่ลงทะเบียนถัดไปจะขยับตามจำนวนแถวที่เหลือจริงโดยอัตโนมัติ
+    const runNumber = sh.getLastRow();
     sh.appendRow([
       new Date(d.submittedAt), d.attend === 'yes' ? 'มา' : 'ไม่มา', d.name, d.contact,
       d.drink, d.guests, d.dietary, d.ride,
       d.readinessLevel ? d.readinessLevel + ' · ' + d.readiness : '',   // ไม่ได้เลือกมาตร = เว้นว่าง
       d.message, d.song, d.readinessLevel || '', d.submissionId || '',
-      d.plate || ''   // มีค่าเฉพาะตอนเลือกตัวเลือก "รถส่วนตัว..." แล้วกรอกทะเบียน
+      d.plate || '',   // มีค่าเฉพาะตอนเลือกตัวเลือก "รถส่วนตัว..." แล้วกรอกทะเบียน
+      runNumber
     ]);
-    return json_({ ok: true });
+    return json_({ ok: true, runNumber: runNumber });
   } catch (err) {
     return json_({ ok: false, error: String(err) });
   } finally {
@@ -61,6 +69,10 @@ function json_(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
 ```
+
+**ถ้าเคย deploy ไปแล้วและแค่จะอัปเดตโค้ด** (เช่น เพิ่มคอลัมน์ 'ลำดับ' รอบนี้): แทนที่โค้ดเดิมในหน้า Apps Script ด้วยโค้ดข้างบนทั้งหมด กด 💾 แล้วกด **Deploy → Manage deployments** → กดไอคอนดินสอ (แก้ไข) ข้างเวอร์ชันปัจจุบัน → เปลี่ยน Version เป็น **New version** → กด **Deploy** (URL เดิมใช้ต่อได้ ไม่ต้องเปลี่ยนใน config.js)
+
+หมายเหตุคอลัมน์ **'ลำดับ'**: เป็นเลขที่ใช้ออกบัตร Guest Pass (JF-0001, JF-0002, ...) นับจาก**จำนวนแถวที่มีอยู่จริงในชีตตอนนั้น** ไม่ใช่ตัวนับแยกที่เก็บไว้ที่อื่น ดังนั้นถ้าลบแถวทดสอบ/แถวไหนออกจากชีต คนที่ลงทะเบียนคนถัดไปจะได้เลขที่ขยับตามจำนวนแถวที่เหลือจริงโดยอัตโนมัติ — ถ้าต้องการให้แขกที่ลงทะเบียนไปแล้วมีเลขนิ่งไม่ขยับ ห้ามลบแถวกลางตาราง (ลบได้เฉพาะแถวท้ายสุดที่ยังไม่มีใครเห็นเลขบัตรตัวเอง เช่น แถวทดสอบ)
 
 3. กด **Deploy → New deployment** เลือกชนิด **Web app**
    - Execute as: **Me**
