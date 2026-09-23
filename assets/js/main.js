@@ -185,7 +185,9 @@
   });
   syncRide();
 
-  // tap a chosen drink / ride again to un-choose it (Fun Stuff is optional)
+  // tap a chosen ride / readiness option again to un-choose it (they're radios,
+  // which can't natively be un-checked by clicking again). Drink is a set of
+  // checkboxes now, so it already toggles on its own — this is a no-op there.
   var downAt = 0;
   $$('.opts--pick label, .opts--mk label', form).forEach(function (lb) {
     var inp = $('input', lb), was = false;
@@ -195,6 +197,11 @@
       was = false;
     });
   });
+
+  // every checked "drink" checkbox, joined into one readable string
+  function checkedDrinks() {
+    return $$('input[name=drink]:checked', form).map(function (i) { return i.value; }).join(', ');
+  }
 
   // attending = no  ->  hide everything that only matters to attendees
   function attend() { return form.elements.attend.value || 'yes'; }
@@ -460,7 +467,7 @@
       contact: contactEl.value.trim(),
       guests: yes ? parseInt(guests.textContent, 10) || 1 : 0,
       dietary: yes ? (dietYes() ? dietEl.value.trim() : 'ไม่มี') : '',
-      drink: yes ? (f.drink.value || '') : '',
+      drink: yes ? checkedDrinks() : '', // guests can pick more than one
       ride: yes ? (f.ride.value || '') : '',
       plate: yes && isPrivateCar() ? plateEl.value.trim() : '',
       readiness: L ? L.name : '',
