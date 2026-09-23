@@ -1,3 +1,4 @@
+/* v2 */
 /*
   Social Wall — shared data helpers (used by social.js and live.js).
   Talks directly to Supabase's REST endpoint (PostgREST) with the public
