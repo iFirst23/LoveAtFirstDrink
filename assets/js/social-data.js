@@ -29,12 +29,14 @@
       headers: headers,
       body: opts.body
     }).then(function (res) {
-      if (!res.ok) {
-        return res.text().then(function (t) {
+      return res.text().then(function (t) {
+        if (!res.ok) {
           throw new Error('Supabase ' + res.status + ': ' + t);
-        });
-      }
-      return res.status === 204 ? null : res.json();
+        }
+        // Prefer: return=minimal responses come back 201/204 with an empty
+        // body — only try to parse JSON when there's actually a body.
+        return t ? JSON.parse(t) : null;
+      });
     });
   }
 
