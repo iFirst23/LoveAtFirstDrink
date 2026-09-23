@@ -398,7 +398,6 @@ legend{padding:0}
 .pp__back:hover{opacity:1}
 .pp__brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
 .pp__brand img{height:38px;width:auto}
-.pp__eyebrow{font:700 12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin:0 0 26px;text-align:center}
 .pass__lbl{margin:0 0 12px;font:700 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--mut);text-align:center}
 .pp__ok{display:flex;align-items:center;gap:8px;background:var(--paper);color:var(--ink);font:700 13px var(--mono);padding:8px 16px;margin-bottom:22px;border:2px solid var(--ink)}
 .pp__actions{display:flex;flex-direction:column;gap:12px;width:100%;max-width:360px;margin-top:26px}
