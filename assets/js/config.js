@@ -5,7 +5,7 @@
 window.WEDDING_CONFIG = {
   // 1) URL ของ Google Apps Script Web App ที่รับข้อมูล RSVP ลง Google Sheet (ขั้นตอนอยู่ใน README.md)
   //    เว้นว่างไว้ = โหมดตัวอย่าง (ฟอร์มใช้ได้ แต่ข้อมูลจะไม่ถูกบันทึก และจะมีข้อความเตือนให้เห็น)
-  rsvpEndpoint: '',
+  rsvpEndpoint: 'https://script.google.com/macros/s/AKfycbzoFLdqOk9sQQ7hSSyoj5JTdeGGmHzOZjrb9RRsJdDb3GfBrdAt0WfN9kKjSs8C4wnw/exec',
 
   // 2) ลิงก์ Google Maps ของสถานที่จริง (ตอนนี้ใช้ลิงก์ค้นหาชื่อ "UNDERCLOUD Lifestyle Venue" ตรงๆ; เว้นว่าง = ใช้ลิงก์ค้นหา "Undercloud Venue Nonthaburi")
   mapUrl: 'https://www.google.com/maps/search/?api=1&query=UNDERCLOUD+Lifestyle+Venue+Nonthaburi',
