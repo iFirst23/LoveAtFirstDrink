@@ -385,19 +385,23 @@
     }).then(function () { saveBtn.disabled = false; });
   });
 
-  // registration code for the Guest Pass page — this site has no shared backend to count guests
-  // against (rsvpEndpoint is empty / preview mode), so this is a stable per-submission code, not a
-  // true arrival order. If a real Google Sheet backend is connected later, swap this for a row number
-  // the Apps Script hands back in its response.
-  function regCode(d) {
+  // fallback registration code for the Guest Pass page — only used in preview mode (no rsvpEndpoint
+  // configured yet), since there's no backend to hand back a real arrival order in that case.
+  function fallbackCode(d) {
     var s = (d.name || '') + '|' + (d.submissionId || ''), h = 0;
     for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
     return 'JF-' + ((h % 9000) + 1000);
   }
+  // real registration order: the Apps Script Web App hands back `runNumber` (row position in the
+  // Sheet at the time it saved), which we store on d.runNumber right after a successful submit —
+  // this is what makes the Guest Pass number a true sequential arrival order once a Sheet is connected.
+  function passCode(d) {
+    return d.runNumber ? 'JF-' + String(d.runNumber).padStart(4, '0') : fallbackCode(d);
+  }
   function buildPassUrl(d) {
     var L = d.readinessLevel ? LEVELS[d.readinessLevel - 1] : LEVELS[0];
     var q = new URLSearchParams({
-      name: d.name || '', code: regCode(d), lv: L ? L.n : 1,
+      name: d.name || '', code: passCode(d), lv: L ? L.n : 1,
       drink: d.drink || '', song: d.song || ''
     });
     return 'pass.html?' + q.toString();
@@ -478,9 +482,10 @@
     fetch(C.rsvpEndpoint, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data), signal: ctrl ? ctrl.signal : undefined })
       .then(function (res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.text(); })
       .then(function (txt) {
-        var ok = false;
-        try { ok = JSON.parse(txt).ok === true; } catch (err) { ok = /^\s*ok\s*$/i.test(txt); }
+        var ok = false, resJson = null;
+        try { resJson = JSON.parse(txt); ok = resJson.ok === true; } catch (err) { ok = /^\s*ok\s*$/i.test(txt); }
         if (!ok) throw new Error('not saved');
+        if (resJson && resJson.runNumber) data.runNumber = resJson.runNumber; // real arrival order from the Sheet, for the Guest Pass code
         sid = null; showStatus(''); showDone(data.attend, false, model, data); // receipt only after the server confirmed the save
       })
       .catch(function () {
