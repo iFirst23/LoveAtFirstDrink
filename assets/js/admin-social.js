@@ -87,10 +87,14 @@
     allPosts.forEach(function (p) {
       var b = bucketOf(p);
       counts[b] = (counts[b] || 0) + 1;
-      if (p.status === 'approved') counts.approved++; // approved tab shows ALL approved (pinned included)
     });
+    // "Published" badge = all approved posts, pinned ones included — the
+    // buckets above are mutually exclusive (pinned approved posts land in
+    // the 'pinned' bucket, not 'approved'), so add them back in here
+    // rather than inside the loop above, which was double-counting.
+    var publishedTotal = (counts.approved || 0) + (counts.pinned || 0);
     document.getElementById('c-pending').textContent = counts.pending || '';
-    document.getElementById('c-approved').textContent = counts.approved || '';
+    document.getElementById('c-approved').textContent = publishedTotal || '';
     document.getElementById('c-pinned').textContent = counts.pinned || '';
     document.getElementById('c-rejected').textContent = counts.rejected || '';
   }
