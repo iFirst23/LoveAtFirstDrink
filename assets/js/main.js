@@ -37,6 +37,34 @@
     $$('[data-gcal]').forEach(function (a) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; });
   })();
 
+  /* ---------- countdown to the wedding ---------- */
+  (function () {
+    var ev = C.event || {};
+    var box = $('#countdown');
+    if (!box || !ev.startUtc) return;
+    var iso = ev.startUtc.replace(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/, '$1-$2-$3T$4:$5:$6Z');
+    var target = new Date(iso).getTime();
+    if (isNaN(target)) return;
+    var dEl = $('[data-cd="d"]', box), hEl = $('[data-cd="h"]', box),
+        mEl = $('[data-cd="m"]', box), sEl = $('[data-cd="s"]', box);
+    function pad(n) { n = String(n); return n.length < 2 ? '0' + n : n; }
+    function tick() {
+      var diff = target - Date.now();
+      if (diff <= 0) {
+        box.classList.add('cdn--done');
+        dEl.textContent = hEl.textContent = mEl.textContent = sEl.textContent = '00';
+        return;
+      }
+      var s = Math.floor(diff / 1000);
+      var d = Math.floor(s / 86400); s -= d * 86400;
+      var h = Math.floor(s / 3600); s -= h * 3600;
+      var m = Math.floor(s / 60); s -= m * 60;
+      dEl.textContent = pad(d); hEl.textContent = pad(h); mEl.textContent = pad(m); sEl.textContent = pad(s);
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
+
   /* ---------- sticky mobile RSVP bar ----------
      Shows once the hero CTA has scrolled away; hides again while the RSVP form
      (or footer) is on screen, or after a successful submit. */
@@ -199,6 +227,7 @@
   /* ---------- "ใบเสร็จความพร้อม" (shown only after the answer was really saved) ---------- */
   var bill = $('#bill'), saveBtn = $('#save-bill'), saveErr = $('#save-err');
   var billBlob = null; // image is prepared in the background so "save" answers instantly (needed for the phone share sheet)
+  var passLink = $('#pass-link');
 
   function whoLabel(name, n) {
     name = name.trim();
@@ -356,12 +385,32 @@
     }).then(function () { saveBtn.disabled = false; });
   });
 
-  function showDone(state, preview, model) {
+  // registration code for the Guest Pass page — this site has no shared backend to count guests
+  // against (rsvpEndpoint is empty / preview mode), so this is a stable per-submission code, not a
+  // true arrival order. If a real Google Sheet backend is connected later, swap this for a row number
+  // the Apps Script hands back in its response.
+  function regCode(d) {
+    var s = (d.name || '') + '|' + (d.submissionId || ''), h = 0;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return 'JF-' + ((h % 9000) + 1000);
+  }
+  function buildPassUrl(d) {
+    var L = d.readinessLevel ? LEVELS[d.readinessLevel - 1] : LEVELS[0];
+    var q = new URLSearchParams({
+      name: d.name || '', code: regCode(d), lv: L ? L.n : 1,
+      drink: d.drink || '', song: d.song || ''
+    });
+    return 'pass.html?' + q.toString();
+  }
+
+  function showDone(state, preview, model, data) {
     done.dataset.state = state;
     $('#preview-note').hidden = !preview;
     saveErr.hidden = true;
     var hasBill = state === 'yes' && !!model;
     bill.hidden = !hasBill; saveBtn.hidden = !hasBill;
+    passLink.hidden = !hasBill;
+    if (hasBill) passLink.href = buildPassUrl(data);
     billBlob = null;
     if (hasBill) {
       renderBill(model);
@@ -419,7 +468,7 @@
 
     if (!C.rsvpEndpoint) { // preview mode: no backend configured yet
       if (window.console) console.warn('[RSVP] rsvpEndpoint is empty in assets/js/config.js. Nothing was saved.', data);
-      showDone(data.attend, true, model); return;
+      showDone(data.attend, true, model, data); return;
     }
 
     var btn = $('.btn--submit', form); btn.disabled = true;
@@ -432,7 +481,7 @@
         var ok = false;
         try { ok = JSON.parse(txt).ok === true; } catch (err) { ok = /^\s*ok\s*$/i.test(txt); }
         if (!ok) throw new Error('not saved');
-        sid = null; showStatus(''); showDone(data.attend, false, model); // receipt only after the server confirmed the save
+        sid = null; showStatus(''); showDone(data.attend, false, model, data); // receipt only after the server confirmed the save
       })
       .catch(function () {
         // answers stay in the form; pressing send again retries with the same submissionId

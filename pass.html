@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Guest Pass — Love AT FIRST DRINK</title>
+<meta name="description" content="Guest Pass ดิจิทัล งานแต่ง Tanawit &amp; Kawisara · เก็บไว้โชว์ที่บาร์ได้เลย">
+<meta name="theme-color" content="#542C2F">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Prompt:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<main class="pp" id="pp">
+  <a class="pp__back" href="index.html#rsvp">← กลับหน้างาน</a>
+
+  <div class="pp__brand"><img src="assets/img/logo-cream.png" alt="TK" width="38" height="32"></div>
+  <p class="pp__eyebrow">JET &amp; FIRST WEDDING · DIGITAL GUEST PASS</p>
+
+  <!-- shown when name/code arrived via the RSVP link -->
+  <div id="pp-has" hidden>
+    <p class="pp__ok">✓ ลงทะเบียนเรียบร้อย แล้วพบกันที่งานนะครับ !</p>
+
+    <p class="pass__lbl">GUEST PASS ของคุณ — เก็บไว้โชว์ที่บาร์ได้เลย</p>
+    <div class="pass__card" id="pass-card">
+      <div class="pass__top">
+        <img class="pass__brand" id="pass-logo" alt="Love AT FIRST DRINK">
+        <span class="pass__lv" id="pass-lv">01</span>
+      </div>
+      <p class="pass__lvname" id="pass-lvname"></p>
+      <div class="pass__hr" aria-hidden="true"></div>
+      <div class="pass__row"><span>ชื่อ</span><b id="pass-name"></b></div>
+      <div class="pass__row"><span>เลขที่</span><b id="pass-code"></b></div>
+      <div class="pass__hr" aria-hidden="true"></div>
+      <div class="pass__row"><span>เครื่องดื่มโปรด</span><b id="pass-drink"></b></div>
+      <div class="pass__row"><span>เพลงโปรด</span><b id="pass-song"></b></div>
+      <div class="pass__foot">26 DEC 2026 · 18:00 · UNDERCLOUD</div>
+    </div>
+
+    <div class="pp__actions">
+      <button class="btn btn--xl" type="button" id="save-pass">บันทึกบัตร · SAVE TO PHONE</button>
+      <a class="btn btn--cream" href="index.html#rsvp">แก้ไขคำตอบ</a>
+    </div>
+    <p class="pp__status" id="pp-status" hidden></p>
+  </div>
+
+  <!-- shown when this page is opened with no guest data (bookmarked / shared without params) -->
+  <div class="pp__empty" id="pp-empty" hidden>
+    <h2>ยังไม่พบข้อมูลบัตร</h2>
+    <p>ตอบรับ RSVP ก่อน แล้วจะมีลิงก์ Guest Pass ของคุณโผล่มาให้เปิดตรงนี้ครับ</p>
+    <div class="pp__actions"><a class="btn btn--xl" href="index.html#rsvp">ไปตอบรับ RSVP →</a></div>
+  </div>
+</main>
+
+<script src="assets/js/pass.js"></script>
+</body>
+</html>

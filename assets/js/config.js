@@ -7,8 +7,8 @@ window.WEDDING_CONFIG = {
   //    เว้นว่างไว้ = โหมดตัวอย่าง (ฟอร์มใช้ได้ แต่ข้อมูลจะไม่ถูกบันทึก และจะมีข้อความเตือนให้เห็น)
   rsvpEndpoint: '',
 
-  // 2) ลิงก์ Google Maps ของสถานที่จริง (ตอนนี้ใช้ลิงก์แชร์ของสถานที่จริง; เว้นว่าง = ใช้ลิงก์ค้นหา "Undercloud Venue Nonthaburi")
-  mapUrl: 'https://share.google/ksFjmOwUYlKO76pBJ',
+  // 2) ลิงก์ Google Maps ของสถานที่จริง (ตอนนี้ใช้ลิงก์ค้นหาชื่อ "UNDERCLOUD Lifestyle Venue" ตรงๆ; เว้นว่าง = ใช้ลิงก์ค้นหา "Undercloud Venue Nonthaburi")
+  mapUrl: 'https://www.google.com/maps/search/?api=1&query=UNDERCLOUD+Lifestyle+Venue+Nonthaburi',
 
   // 2.1) ข้อมูลที่จอดรถ (เว้นว่าง = ไม่แสดงการ์ด PARKING) เช่น 'ที่จอดรถหน้างาน ฟรี ประมาณ 40 คัน'
   parkingNote: '',
@@ -19,7 +19,7 @@ window.WEDDING_CONFIG = {
     startUtc: '20261226T110000Z',
     endUtc:   '20261226T160000Z',
     title:    'Jet & First Wedding',
-    location: 'Undercloud Venue, Nonthaburi',
+    location: 'UNDERCLOUD Lifestyle Venue, Nonthaburi',
     description: 'Love AT FIRST DRINK — Tanawit & Kawisara. Bar opens 18:00. Drink up, never drive: book your ride home.'
   }
 };
