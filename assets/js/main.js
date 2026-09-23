@@ -472,6 +472,7 @@
 
     if (!C.rsvpEndpoint) { // preview mode: no backend configured yet
       if (window.console) console.warn('[RSVP] rsvpEndpoint is empty in assets/js/config.js. Nothing was saved.', data);
+      if (yes) { location.href = buildPassUrl(data); return; } // straight to the Guest Pass — no on-page bill
       showDone(data.attend, true, model, data); return;
     }
 
@@ -486,7 +487,9 @@
         try { resJson = JSON.parse(txt); ok = resJson.ok === true; } catch (err) { ok = /^\s*ok\s*$/i.test(txt); }
         if (!ok) throw new Error('not saved');
         if (resJson && resJson.runNumber) data.runNumber = resJson.runNumber; // real arrival order from the Sheet, for the Guest Pass code
-        sid = null; showStatus(''); showDone(data.attend, false, model, data); // receipt only after the server confirmed the save
+        sid = null; showStatus('');
+        if (yes) { location.href = buildPassUrl(data); return; } // straight to the Guest Pass — no on-page bill
+        showDone(data.attend, false, model, data); // "sorry to miss you" screen for non-attendees
       })
       .catch(function () {
         // answers stay in the form; pressing send again retries with the same submissionId
