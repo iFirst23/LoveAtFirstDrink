@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>document.documentElement.classList.add('js')</script>
+<title>THE MORNING AFTER — Love AT FIRST DRINK</title>
+<meta name="description" content="#JFLoveAtFirstDrink — รูป/คลิปจากแขกในงานแต่ง Tanawit &amp; Kawisara รวมไว้ที่นี่">
+<meta name="theme-color" content="#542C2F">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Prompt:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/social.css">
+</head>
+<body>
+
+<header class="nav is-scrolled"><div class="nav__in">
+  <a class="nav__logo" href="index.html#top" aria-label="Tanawit &amp; Kawisara"><img src="assets/img/logo-cream.png" alt="TK" width="47" height="40"></a>
+  <nav class="nav__r" aria-label="เมนูหลัก">
+    <a class="l" href="index.html#agenda">กำหนดการ</a>
+    <a class="l opt" href="index.html#gallery">Gallery</a>
+    <a class="l" href="index.html#rsvp">RSVP</a>
+  </nav>
+</div></header>
+
+<main class="soc" id="top">
+  <section class="soc-hero"><div class="wrap">
+    <span class="eyebrow">THE MORNING AFTER</span>
+    <h1 class="disp h2">Apparently, <em>this</em> happened.</h1>
+    <p>รูป/คลิปจากมือถือแขกทุกคนในงาน — แท็ก <b class="nb">#JFLoveAtFirstDrink</b> บน Instagram แล้วเราจะไปตามหาเอง หรือกดปุ่มด้านล่างส่งลิงก์ TikTok / Facebook / อื่นๆ มาเองเลยก็ได้</p>
+    <span class="soc-hero__tag">#JFLoveAtFirstDrink</span>
+  </div></section>
+
+  <div class="soc-bar"><div class="wrap">
+    <div class="soc-filters" id="filters" role="group" aria-label="กรองตามแพลตฟอร์ม">
+      <button type="button" class="is-on" data-f="">ALL CHAOS</button>
+      <button type="button" data-f="instagram">INSTAGRAM</button>
+      <button type="button" data-f="tiktok">TIKTOK</button>
+      <button type="button" data-f="facebook">FACEBOOK</button>
+    </div>
+  </div></div>
+
+  <div class="wrap">
+    <div class="wall" id="wall" aria-live="polite"></div>
+
+    <div class="soc-empty" id="empty" hidden>
+      <h2 class="disp">TOO SOBER?</h2>
+      <p>Be the first to make questionable photographic decisions.</p>
+      <button class="btn btn--xl" type="button" data-open-sheet>+ ADD YOUR MOMENT</button>
+      <p style="margin-top:18px;font-size:13px;color:rgba(255,240,204,.6)">หรือโพสต์ลง Instagram พร้อมแท็ก #JFLoveAtFirstDrink แล้วเดี๋ยวเราตามหาเจอเอง</p>
+    </div>
+
+    <div class="soc-more" id="more-wrap" hidden>
+      <button class="btn btn--ghost" type="button" id="load-more">โหลดเพิ่ม · LOAD MORE</button>
+    </div>
+  </div>
+</main>
+
+<div class="soc-fab">
+  <button class="btn btn--xl" type="button" data-open-sheet>+ ADD YOUR MOMENT</button>
+</div>
+
+<!-- ============ bottom sheet: manual submission ============ -->
+<div class="sheet-scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
+  <button class="sheet__close" type="button" id="sheet-close" aria-label="ปิด">×</button>
+  <div class="sheet__grab" aria-hidden="true"></div>
+
+  <div id="sheet-form-wrap">
+    <h2 id="sheet-h">Got a moment worth sharing?</h2>
+    <p class="lead2">แปะลิงก์ TikTok / Facebook / อื่นๆ — เดี๋ยวทีมงานเช็คแล้วขึ้นจอให้ (ไม่โชว์ทันที ต้องผ่านการตรวจสอบก่อน)</p>
+
+    <form id="sheet-form">
+      <div class="f">
+        <label>แพลตฟอร์ม</label>
+        <div class="plat-pick" role="radiogroup" aria-label="แพลตฟอร์ม">
+          <label><input type="radio" name="platform" value="tiktok" checked><span>🎵<br>TikTok</span></label>
+          <label><input type="radio" name="platform" value="facebook"><span>📘<br>Facebook</span></label>
+          <label><input type="radio" name="platform" value="instagram"><span>📸<br>Instagram</span></label>
+          <label><input type="radio" name="platform" value="other"><span>🔗<br>อื่นๆ</span></label>
+        </div>
+      </div>
+      <div class="f">
+        <label for="f-url">ลิงก์โพสต์ <span style="color:var(--redd)">*</span></label>
+        <input type="url" id="f-url" name="url" placeholder="https://..." required>
+      </div>
+      <div class="f">
+        <label for="f-user">ชื่อ/@username ของคุณ (ไม่บังคับ)</label>
+        <input type="text" id="f-user" name="username" placeholder="@your_handle">
+      </div>
+      <div class="f">
+        <label for="f-cap">แคปชั่นสั้นๆ (ไม่บังคับ)</label>
+        <textarea id="f-cap" name="caption" placeholder="บอกเล่าเรื่องราวสั้นๆ..."></textarea>
+      </div>
+      <div class="f">
+        <label for="f-thumb">ลิงก์รูปภาพ/สกรีนช็อต (ไม่บังคับ — ถ้ามีจะโชว์สวยกว่า)</label>
+        <input type="url" id="f-thumb" name="thumbnail" placeholder="https://...jpg">
+      </div>
+      <button class="btn btn--xl sheet__submit" type="submit">ส่งให้ทีมงานตรวจสอบ</button>
+      <p class="sheet__status" id="sheet-status" hidden></p>
+    </form>
+  </div>
+
+  <div id="sheet-done" class="sheet__done" hidden>
+    <b>ส่งแล้ว! 🎉</b>
+    <p>รอทีมงานตรวจสอบก่อนขึ้นจอนะ ขอบคุณที่แชร์โมเมนต์ให้กัน</p>
+    <button class="btn btn--cream" type="button" id="sheet-done-close">ปิด</button>
+  </div>
+</div>
+
+<script src="assets/js/social-config.js"></script>
+<script src="assets/js/social-data.js"></script>
+<script src="assets/js/social.js"></script>
+</body>
+</html>

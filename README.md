@@ -122,3 +122,42 @@ function json_(o) {
 - ฟอนต์โหลดจาก Google Fonts ต้องมีอินเทอร์เน็ตตอนเปิดเว็บ
 - ปุ่ม "เพิ่มลงปฏิทิน" ตั้งเวลาจบเป็น 23:00 น. เป็นค่าสมมติ แก้ได้ใน `config.js`
 - ข้อความ "เมาได้ · แต่ห้ามขับ" มีทั้งในส่วนสติกเกอร์ ส่วน GETTING HOME และท้ายหน้า
+
+## 5) Social Wall (#JFLoveAtFirstDrink) — `/social`, `/live`, `/admin/social`
+
+ระบบผนังรูป/คลิปจากแขก (ดู `assets/js/social*.js`, `api/admin/*.js`) ต้องใช้ **Supabase** เป็นฐานข้อมูล เพราะเว็บนี้เป็น static site ล้วน ไม่มี database ในตัว ทำตามนี้ครั้งเดียวตอนตั้งค่า:
+
+### 5.1 สร้าง Supabase project
+1. supabase.com → Sign up (ใช้ GitHub login ได้) → **New Project** → เลือก region Singapore
+2. รอสร้างเสร็จ → **SQL Editor → New query** → คัดลอกทั้งไฟล์ `supabase/schema.sql` ในโฟลเดอร์นี้ไปวาง แล้วกด Run (สร้างตาราง `social_posts` + policy ความปลอดภัย + เปิด Realtime ให้อัตโนมัติ)
+3. **Project Settings → API** → คัดลอก 3 ค่า: **Project URL**, **anon public key**, **service_role key** (อันหลังนี้เป็นความลับ ห้ามใส่ในไฟล์ฝั่งหน้าเว็บเด็ดขาด)
+
+### 5.2 ตั้งค่าฝั่งหน้าเว็บ (public, ไม่ลับ)
+แก้ `assets/js/social-config.js`:
+```js
+window.SOCIAL_CONFIG = {
+  supabaseUrl: 'https://xxxx.supabase.co',
+  supabaseAnonKey: 'anon-public-key-ตรงนี้',
+  hashtag: '#JFLoveAtFirstDrink'
+};
+```
+เว้นว่างไว้ = โหมดตัวอย่าง (เห็นหน้าตาเว็บได้แต่ยังส่ง/บันทึกจริงไม่ได้)
+
+### 5.3 ตั้งค่าฝั่งเซิร์ฟเวอร์ (ลับ) — Vercel → Project → Settings → Environment Variables
+เพิ่ม 3 ตัวนี้ (ใส่แล้วต้อง Redeploy 1 ครั้งให้มีผล):
+
+| ชื่อ | ค่า |
+|---|---|
+| `SUPABASE_URL` | Project URL เดียวกับข้อ 5.1 |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role key จากข้อ 5.1 (ลับ) |
+| `ADMIN_PASSWORD` | รหัสผ่านเข้าหน้า `/admin/social` (ตั้งเอง) |
+
+ตัวแปรเหล่านี้ใช้เฉพาะใน `api/admin/*.js` (Vercel serverless functions) เท่านั้น ไม่เคยถูกส่งไปที่เบราว์เซอร์
+
+### 5.4 ใช้งาน
+- **`/social`** — "THE MORNING AFTER" หน้าแสดงผนังรูป/คลิป + ปุ่ม "+ ADD YOUR MOMENT" ให้แขกส่งลิงก์ TikTok/Facebook/อื่นๆ เอง (เข้าคิว pending รออนุมัติ)
+- **`/admin/social`** — หน้าแอดมิน ใส่รหัสผ่านจากข้อ 5.3 แล้วกด Approve/Reject/Pin/Unpublish ได้ เหมาะกับใช้จากมือถือ
+- **`/live`** — โหมดจอโปรเจกเตอร์/ทีวี ไม่มีเมนู หมุนโชว์เฉพาะโพสต์ที่ approved แล้ว อัปเดตเองแบบเรียลไทม์เมื่อแอดมิน approve โพสต์ใหม่ (ไม่ต้อง refresh หน้าจอ)
+
+### 5.5 Instagram auto-discovery (#JFLoveAtFirstDrink อัตโนมัติ)
+ยังไม่ทำในรอบนี้ตามที่เลือกไว้ (Meta จำกัดสิทธิ์ hashtag search API มาก ต้องมีบัญชี Instagram Business/Creator + ผ่าน App Review) ตอนนี้ใช้ "+ ADD YOUR MOMENT" ครอบคลุมทุกแพลตฟอร์มรวม Instagram ไปก่อน (แปะลิงก์โพสต์ IG เข้ามาเองได้เหมือนกัน) โค้ดฝั่งข้อมูลแยก `source: 'manual_submission'` ไว้กับ `'instagram_auto'` แล้ว ถ้าจะต่อ API จริงในอนาคตเพิ่มได้โดยไม่ต้องแก้ UI

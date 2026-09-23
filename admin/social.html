@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Social Wall Admin — Love AT FIRST DRINK</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#542C2F">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/admin-social.css">
+</head>
+<body>
+
+<main class="adm" id="adm">
+
+  <!-- ============ login gate ============ -->
+  <div class="adm-login" id="login">
+    <h1 class="disp">SOCIAL WALL<br>ADMIN</h1>
+    <p>ใส่รหัสผ่านแอดมินเพื่อจัดการโพสต์ #JFLoveAtFirstDrink</p>
+    <form id="login-form">
+      <input type="password" id="pw" placeholder="รหัสผ่าน" autocomplete="current-password" required>
+      <p class="err" id="login-err"></p>
+      <button class="btn btn--xl" type="submit" style="width:100%">เข้าสู่ระบบ</button>
+    </form>
+  </div>
+
+  <!-- ============ moderation dashboard ============ -->
+  <div id="dash" hidden>
+    <div class="adm__wrap">
+      <div class="adm-topbar">
+        <div class="adm__brand"><img src="../assets/img/logo-cream.png" alt="TK"><b>SOCIAL WALL ADMIN</b></div>
+        <button class="adm-logout" type="button" id="logout">ออกจากระบบ</button>
+      </div>
+
+      <div class="adm-tabs" role="tablist">
+        <button type="button" data-tab="pending" class="is-on">Pending <span class="n" id="c-pending"></span></button>
+        <button type="button" data-tab="approved">Published <span class="n" id="c-approved"></span></button>
+        <button type="button" data-tab="pinned">Pinned <span class="n" id="c-pinned"></span></button>
+        <button type="button" data-tab="rejected">Rejected <span class="n" id="c-rejected"></span></button>
+      </div>
+
+      <div class="adm-list" id="list"></div>
+      <p class="adm-empty" id="list-empty" hidden>ไม่มีรายการในหมวดนี้</p>
+    </div>
+  </div>
+</main>
+
+<script src="../assets/js/social-config.js"></script>
+<script src="../assets/js/admin-social.js"></script>
+</body>
+</html>

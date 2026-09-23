@@ -1,0 +1,50 @@
+/* ============ /admin/social — moderation ============ */
+.adm{background:var(--bg);min-height:100vh;padding:28px 16px 80px}
+.adm__wrap{max-width:640px;margin:0 auto}
+.adm__brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.adm__brand img{height:34px}
+.adm__brand b{font:800 15px var(--mono);letter-spacing:.04em;color:var(--gold)}
+
+/* ---- login ---- */
+.adm-login{max-width:360px;margin:14vh auto 0;text-align:center}
+.adm-login h1{margin:0 0 8px;font:800 clamp(26px,5vw,32px) var(--disp);color:var(--gold)}
+.adm-login p{margin:0 0 22px;color:rgba(255,240,204,.75);font-size:14px}
+.adm-login input{width:100%;background:var(--paper2);border:2px solid var(--ink);padding:14px;font:600 16px var(--mono);margin-bottom:12px;box-sizing:border-box}
+.adm-login .err{color:var(--rose);font:700 13px var(--mono);margin:0 0 10px;min-height:18px}
+
+/* ---- tabs ---- */
+.adm-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.adm-tabs button{flex:1;min-width:80px;font:700 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:10px 6px;border:2px solid rgba(255,240,204,.3);background:transparent;color:var(--cream);border-radius:8px}
+.adm-tabs button.is-on{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.adm-tabs button .n{opacity:.7;font-weight:600}
+
+/* ---- list ---- */
+.adm-list{display:flex;flex-direction:column;gap:14px}
+.adm-empty{text-align:center;color:rgba(255,240,204,.6);padding:60px 10px;font:600 14px var(--mono)}
+.adm-card{background:var(--paper);color:var(--ink);border-radius:12px;padding:16px;display:flex;gap:12px}
+.adm-card__thumb{flex:0 0 72px;width:72px;height:72px;border-radius:8px;overflow:hidden;background:var(--org);display:flex;align-items:center;justify-content:center}
+.adm-card__thumb img{width:100%;height:100%;object-fit:cover}
+.adm-card__thumb svg{width:26px;height:26px;fill:var(--cream)}
+.adm-card__b{flex:1;min-width:0}
+.adm-card__top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.adm-card__plat{font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--redd)}
+.adm-card__time{font:500 11px var(--mono);color:var(--mut)}
+.adm-card__u{margin:2px 0 0;font:800 15px var(--disp)}
+.adm-card__cap{margin:3px 0 0;font:500 13px/1.4 var(--mono);color:var(--mut);overflow-wrap:anywhere}
+.adm-card__link{display:inline-block;margin-top:6px;font:700 12px var(--mono);color:var(--org);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.adm-card__badges{display:flex;gap:6px;margin-top:6px}
+.adm-card__badges span{font:700 10px var(--mono);padding:2px 7px;border-radius:99px;background:rgba(46,20,22,.1)}
+.adm-card__actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.adm-card__actions button{font:700 12px var(--mono);padding:9px 12px;min-height:38px;border:2px solid var(--ink);background:var(--paper2);color:var(--ink);border-radius:6px}
+.adm-card__actions button.go{background:var(--olv);border-color:var(--olv);color:var(--cream)}
+.adm-card__actions button.stop{background:var(--redd);border-color:var(--redd);color:var(--cream)}
+.adm-card__actions button.pin{background:var(--gold);border-color:var(--ink)}
+.adm-card__actions button[disabled]{opacity:.5}
+
+.adm-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.adm-logout{background:transparent;border:0;color:rgba(255,240,204,.6);font:700 12px var(--mono);text-decoration:underline}
+
+@media (max-width:420px){
+  .adm-card{flex-direction:column}
+  .adm-card__thumb{width:100%;height:140px}
+}
