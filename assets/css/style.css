@@ -416,8 +416,8 @@ legend{padding:0}
 .pass__lvname{margin:18px 0 0;font:700 15px/1.35 var(--mono);letter-spacing:.02em;position:relative}
 .pass__hr{border-top:1px dashed currentColor;opacity:.45;margin:14px 0;position:relative}
 .pass__row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font:600 12.5px var(--mono);margin:8px 0;position:relative}
-.pass__row span{opacity:.75;letter-spacing:.03em}
-.pass__row b{font:800 16px var(--disp);text-align:right;overflow-wrap:anywhere}
+.pass__row span{opacity:.75;letter-spacing:.03em;flex:none}
+.pass__row b{font:800 16px var(--disp);text-align:right;overflow-wrap:anywhere;min-width:0;flex:1 1 auto}
 .pass__foot{margin-top:18px;font:700 11.5px var(--mono);letter-spacing:.1em;opacity:.85;position:relative}
 .receipt.is-done .items,.receipt.is-done .total{display:none}
 @media (max-width:640px){.bill__who{font-size:17px}.bill__v{font-size:16px}.bill__tot b{font-size:19px}.bill__tot em{font-size:18px}}
