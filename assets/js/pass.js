@@ -172,14 +172,73 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 10000);
   }
 
+  // ---------- in-app browsers (LINE / Facebook / Instagram / Messenger) ----------
+  // Their webviews silently swallow both the Web Share API and the <a download> trick —
+  // nothing errors, the tap just does nothing. So for these we skip straight to a
+  // full-screen "press and hold to save" view, which only relies on the phone's native
+  // long-press-image menu and works everywhere, no download API required.
+  function detectInApp() {
+    var ua = navigator.userAgent || '';
+    if (/\bLine\//i.test(ua)) return { name: 'LINE', autoEscape: true };
+    if (/FBAN|FBAV|FB_IAB/i.test(ua)) return { name: 'Facebook', autoEscape: false };
+    if (/Instagram/i.test(ua)) return { name: 'Instagram', autoEscape: false };
+    if (/\bMessenger\b/i.test(ua)) return { name: 'Messenger', autoEscape: false };
+    return null;
+  }
+  var inApp = detectInApp();
+
+  // LINE specifically honours this query flag and reopens the current page in the
+  // phone's real browser (Safari / Chrome), where SAVE TO PHONE works normally.
+  function openInExternalBrowser() {
+    var url = location.href;
+    url += (url.indexOf('?') === -1 ? '?' : '&') + 'openExternalBrowser=1';
+    location.href = url;
+  }
+
+  function showSaveOverlay(blob) {
+    var url = URL.createObjectURL(blob);
+    var ov = document.createElement('div');
+    ov.className = 'pp__ov';
+    ov.innerHTML =
+      '<button type="button" class="pp__ov-close" aria-label="ปิด">×</button>' +
+      '<img class="pp__ov-img" src="' + url + '" alt="Guest Pass">' +
+      '<p class="pp__ov-hint">กดค้างที่รูปด้านบน แล้วแตะ “บันทึกรูปภาพ”</p>' +
+      (inApp && inApp.autoEscape
+        ? '<button type="button" class="btn btn--cream pp__ov-esc">หรือเปิดในเบราว์เซอร์ →</button>'
+        : inApp
+        ? '<p class="pp__ov-hint2">หรือแตะเมนู ⋯ มุมบนแล้วเลือก “เปิดในเบราว์เซอร์”</p>'
+        : '');
+    document.body.appendChild(ov);
+    document.body.style.overflow = 'hidden';
+    function close() {
+      ov.remove();
+      document.body.style.overflow = '';
+      setTimeout(function () { URL.revokeObjectURL(url); }, 500);
+    }
+    ov.querySelector('.pp__ov-close').addEventListener('click', close);
+    ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
+    var esc = ov.querySelector('.pp__ov-esc');
+    if (esc) esc.addEventListener('click', openInExternalBrowser);
+  }
+
   var FILE = 'love-at-first-drink-guest-pass.png';
   var saveBtn = $('#save-pass'), statusEl = $('#pp-status');
   var blobP = makePassBlob(model); blobP.catch(function () {}); // prepare now so "save" answers instantly
+
+  // heads-up before they even tap, so the overlay isn't a surprise
+  if (inApp) {
+    var note = document.createElement('p');
+    note.className = 'pp__inapp-note';
+    note.textContent = 'เปิดจาก ' + inApp.name + ' อยู่ตอนนี้ — กด “บันทึกบัตร” แล้วค้างที่รูปเพื่อเซฟภาพ';
+    var actions = $('.pp__actions');
+    actions.parentNode.insertBefore(note, actions);
+  }
 
   saveBtn.addEventListener('click', function () {
     statusEl.hidden = true;
     saveBtn.disabled = true;
     blobP.then(function (blob) {
+      if (inApp) { showSaveOverlay(blob); return; }
       var coarse = window.matchMedia && matchMedia('(pointer:coarse)').matches, file = null;
       try { file = new File([blob], FILE, { type: 'image/png' }); } catch (e) {}
       if (coarse && file && navigator.canShare && navigator.canShare({ files: [file] })) {
