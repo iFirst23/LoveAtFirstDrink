@@ -123,8 +123,17 @@
     function row(k, v) {
       text(k, x0, y, '600 15px ' + F_MONO, labelC, 'left');
       ctx.font = '800 21px ' + F_DISP;
-      if (ctx.measureText(v).width <= iw) { text(v, x1, y, '800 21px ' + F_DISP, m.lv.fg, 'right'); y += 40; }
+      // Small safety margin: some browser engines (notably WebKit-based in-app webviews,
+      // e.g. LINE's) can paint complex-script text a little wider than measureText
+      // predicted, so don't cut the "fits on one line" decision razor-thin.
+      var fits = ctx.measureText(v).width <= iw - 8;
+      // Hard safety net regardless of *why* a width estimate might be off: clip this
+      // row's value to the card's own margins so a value can never visually spill past
+      // the card edge — worst case it's clipped, never blown out across the image.
+      if (paint) { ctx.save(); ctx.beginPath(); ctx.rect(x0, 0, iw, H); ctx.clip(); }
+      if (fits) { text(v, x1, y, '800 21px ' + F_DISP, m.lv.fg, 'right'); y += 40; }
       else { y += 30; wrapText(ctx, v, iw).forEach(function (ln) { text(ln, x1, y, '800 21px ' + F_DISP, m.lv.fg, 'right'); y += 30; }); y += 10; }
+      if (paint) ctx.restore();
     }
     row('ชื่อ', m.name);
     row('เลขที่', m.code);
